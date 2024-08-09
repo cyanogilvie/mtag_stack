@@ -152,9 +152,9 @@ static void mock_parse(char* str) //<<<
 		mtag_stack_add(&t2, 24);
 
 		size_t	t1c;
-		[[maybe_unused]]char**	t1v = mtag_stack_harvest(&t1, str, &t1c);
+		mtag_stack_harvest(&t1, str, &t1c);
 		size_t	t2c;
-		[[maybe_unused]]char**	t2v = mtag_stack_harvest(&t2, str, &t2c);
+		mtag_stack_harvest(&t2, str, &t2c);
 
 		if (t1c != t2c) {
 			fprintf(stderr, "tag stacks are different lengths: %" PRIuPTR " != %" PRIuPTR "\n", t1c, t2c);
@@ -176,7 +176,7 @@ static void mock_parse(char* str) //<<<
 	if (g_it > 1) printf("\n%d iterations: %.3f nanoseconds/iteration\n", g_it, elapsed_nsec/(double)g_it);
 }
 
-
+//>>>
 static void test_simple() //<<<
 {
 	struct timespec	start_ts;
@@ -203,10 +203,10 @@ static void test_simple() //<<<
 #define TAB_FMT_D		"%15s %12" PRIdPTR " %12" PRIdPTR "\n"
 	printf(TAB_FMT_H, "",			"Expect",	"Got");
 #define REPORT(f, ex) printf(TAB_FMT_D, #f, (ex), c.f);
-	REPORT(segments,	UINTMAX_C(6)*g_it);
+	REPORT(segments,	UINTMAX_C(18)*g_it);
 	REPORT(relpaths,	UINTMAX_C(0)*g_it);
-	REPORT(abspaths,	UINTMAX_C(1)*g_it);
-	REPORT(unsafe,		UINTMAX_C(0)*g_it);
+	REPORT(abspaths,	UINTMAX_C(3)*g_it);
+	REPORT(unsafe,		UINTMAX_C(2)*g_it);
 #undef REPORT
 #undef TAB_FMT_H
 #undef TAB_FMT_D
