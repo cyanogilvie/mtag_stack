@@ -10,3 +10,5 @@ perf.data.old
 *.swo
 *.gcda
 *.gcno
+generated
+test

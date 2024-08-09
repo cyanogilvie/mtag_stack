@@ -2,27 +2,27 @@
 #include <limits.h>
 #include <string.h>
 
-static size_t mtag_stack_hist_ensure_avail(struct mtag_stack_hist*const b, const size_t len)
+static size_t mtag_stack_hist_ensure_avail(struct mtag_stack_hist*const hist, const size_t len)
 {
-    const uint32_t newlen = b->top + len;
-    if (newlen > b->avail) {
-		const size_t newavail = b->avail * 2;
-		if (b->str == b->staticstorage) {
+    const uint32_t newlen = hist->top + len;
+    if (newlen > hist->avail) {
+		const size_t newavail = hist->avail * 2;
+		if (hist->str == hist->staticstorage) {
 			uint8_t*const	newstr = malloc(newavail);
-			memcpy(newstr, b->str, b->top);
-			b->str = newstr;
+			memcpy(newstr, hist->str, hist->top);
+			hist->str = newstr;
 		} else {
-			b->str = realloc(b->str, newavail);
+			hist->str = realloc(hist->str, newavail);
 		}
-		b->avail = newlen;
+		hist->avail = newlen;
     }
-	return b->top;
+	return hist->top;
 }
 
-static void output_pack(struct mtag_stack_hist*const b, const uint64_t ofs, const int64_t dist)
+static void output_pack(struct mtag_stack_hist*const hist, const uint64_t ofs, const int64_t dist)
 {
-	const size_t res = mtag_stack_hist_ensure_avail(b, 18);
-	uint8_t*const	old = b->str + res;
+	const size_t res = mtag_stack_hist_ensure_avail(hist, 18);
+	uint8_t*const	old = hist->str + res;
 	uint8_t*		o = old;
 	uint64_t		n;
 
@@ -144,17 +144,17 @@ static void output_pack(struct mtag_stack_hist*const b, const uint64_t ofs, cons
 		*o++ =              ( n        & 0b11111111);
 	}
 
-	b->top += o-old;
+	hist->top += o-old;
 }
 
 //>>>
 
-void mtag_stack_push(struct mtag_stack*const tag, ptrdiff_t dist)
+void mtag_stack_add(struct mtag_stack*const tag, ptrdiff_t dist)
 {
-	struct mtag_stack_hist*const	b = tag->b;
-	const size_t 		newofs = b->top;
+	struct mtag_stack_hist*const	hist = tag->hist;
+	const size_t 		newofs = hist->top;
 
-	if (tag->count) output_pack(b, newofs - tag->ofs, dist - tag->dist);
+	if (tag->count) output_pack(hist, newofs - tag->ofs, dist - tag->dist);
 	tag->ofs  = newofs;
 	tag->dist = dist;
 	tag->count++;
@@ -185,13 +185,13 @@ static const uint8_t e_mask[256] = {
 
 void mtag_stack_prev(struct mtag_stack*const tag)
 {
-	struct mtag_stack_hist*const	b = tag->b;
-	const uint8_t*	o = b->str + tag->ofs;
+	struct mtag_stack_hist*const	hist = tag->hist;
+	const uint8_t*	o = hist->str + tag->ofs;
 	uint8_t			ch;
 	int				len;
 	uint64_t		n;
 
-#define BRANCHLESS	1
+#define BRANCHLESS	0
 
 #if BRANCHLESS == 0
 	int				neg;
@@ -221,7 +221,7 @@ void mtag_stack_prev(struct mtag_stack*const tag)
 char** mtag_stack_harvest(struct mtag_stack*const tag, char* base, size_t* count)
 {
 	const size_t	matches	= tag->count;
-	char**			arr = (char**)(mtag_stack_hist_ensure_avail(tag->b, matches * sizeof(char*)) + tag->b->str);
+	char**			arr = (char**)(mtag_stack_hist_ensure_avail(tag->hist, matches * sizeof(char*)) + tag->hist->str);
 
 	if (matches) {
 		ptrdiff_t i = matches;
@@ -232,7 +232,7 @@ char** mtag_stack_harvest(struct mtag_stack*const tag, char* base, size_t* count
 		}
 	}
 
-	tag->b->top += matches * sizeof(char*);
+	tag->hist->top += matches * sizeof(char*);
 	*count = matches;
 	return arr;
 }
