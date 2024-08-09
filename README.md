@@ -6,8 +6,8 @@ resolving a trie of int64_t offsets.  The motivation is to provide an mtag
 implementation compatible with re2c that is as performant as possible (low
 allocation load, low stack mem usage, good cache locality).
 
-=== LICENSE
-
+LICENSE
+-------
 This package is placed in the public domain: the author disclaims
 copyright and liability to the extent allowed by law. For those
 jurisdictions that limit an author’s ability to disclaim copyright this
