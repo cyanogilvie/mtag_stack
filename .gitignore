@@ -1,0 +1,12 @@
+*.so
+*.so.*
+*.o
+core
+cachegrind.out
+prof
+perf.data
+perf.data.old
+*.swp
+*.swo
+*.gcda
+*.gcno
