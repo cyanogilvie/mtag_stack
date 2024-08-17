@@ -6,12 +6,12 @@ RE2C = re2c
 #RE2CARGS = -W -Werror --case-ranges
 #RE2CARGS = -W -Werror -Wno-nondeterministic-tags --case-ranges
 RE2CARGS = -W -Werror -Wno-nondeterministic-tags
-CFLAGS_OPTIMIZE = -O3 -ggdb3 -march=haswell -mtune=native
-CFLAGS_DEBUG = -Og -ggdb3
+CFLAGS_OPTIMIZE = -O3 -march=haswell -mtune=native
+CFLAGS_DEBUG = -Og
 LTO = -flto
-CFLAGS = $(CFLAGS_OPTIMIZE) -g -std=c11 -Wall -Werror $(LTO) $(PGO) -I$(CURDIR)
+CFLAGS = $(CFLAGS_OPTIMIZE) -ggdb3 -std=c11 -Wall -Werror $(LTO) $(PGO) -I$(CURDIR)
 LDFLAGS = $(LTO) $(PGO)
-VER = 2.0
+VER = 2.0.1
 PGOGEN_BUILD = -fprofile-generate=prof
 PGO_BUILD = -fprofile-use=prof -fprofile-partial-training
 PGO =
@@ -98,7 +98,7 @@ dist-clean:
 dist: generated
 	mkdir -p $(DIST_DIR)
 	mkdir -p $(DIST_DIR)/generated
-	cp Makefile *.c *.h LICENSE README.md $(DIST_DIR)/
+	cp Makefile *.c *.re *.h LICENSE README.md $(DIST_DIR)/
 	cp generated/*.c $(DIST_DIR)/generated/
 	(cd $(DIST_ROOT); tar czf $(PKG_DIR).tar.gz $(PKG_DIR))
 
