@@ -1,12 +1,13 @@
 DESTDIR =
 PREFIX = /usr/local
 OBJS = mtag_stack.o
-CC = cc
+CC = gcc
 RE2C = re2c
 #RE2CARGS = -W -Werror --case-ranges
-RE2CARGS = -W -Werror -Wno-nondeterministic-tags --case-ranges
-CFLAGS_OPTIMIZE = -O3 -g
-CFLAGS_DEBUG = -Og -g
+#RE2CARGS = -W -Werror -Wno-nondeterministic-tags --case-ranges
+RE2CARGS = -W -Werror -Wno-nondeterministic-tags
+CFLAGS_OPTIMIZE = -O3 -ggdb3 -march=haswell -mtune=native
+CFLAGS_DEBUG = -Og -ggdb3
 LTO = -flto
 CFLAGS = $(CFLAGS_OPTIMIZE) -g -std=c11 -Wall -Werror $(LTO) $(PGO) -I$(CURDIR)
 LDFLAGS = $(LTO) $(PGO)
@@ -53,17 +54,17 @@ test: generated/test.o library
 	$(CC) $(CFLAGS) -Wl,-rpath="$(CURDIR)" -o $@ $< -L. -I. -lmtag_stack
 
 valgrind: test
-	$(VALGRIND) $(VALGRINDARGS) ./test
+	$(VALGRIND) $(VALGRINDARGS) ./test $(TESTFLAGS)
 
 cachegrind: test
 	-rm cachegrind.out
-	$(VALGRIND) $(CACHEGRINDARGS) ./test "benchmark 100000" simple
+	$(VALGRIND) $(CACHEGRINDARGS) ./test "benchmark 1000" manyfiles2
 	cg_annotate cachegrind.out
 
 pgo:
 	rm -rf prof
 	make -C . PGO="$(PGOGEN_BUILD)" clean all
-	./test "benchmark 1000000" simple
+	./test "benchmark 100000" manyfiles2
 	make -C . PGO="$(PGO_BUILD)" clean_bins all
 
 coverage: all
@@ -71,17 +72,17 @@ coverage: all
 	./test
 
 vim-gdb: all
-	vim -c "set number" -c "set mouse=a" -c "set foldlevel=100" -c "Termdebug -ex set\ print\ pretty\ on --args ./test" -c "2windo set nonumber" -c "1windo set nonumber" test.re
+	vim -c "set number" -c "set mouse=a" -c "set foldlevel=100" -c "Termdebug -ex set\ print\ pretty\ on --args ./test $(TESTFLAGS)" -c "2windo set nonumber" -c "1windo set nonumber" test.re
 
 perf: test
-	sudo perf record ./test "benchmark 5000000" simple
+	sudo perf record ./test "benchmark 100000" manyfiles2
 	sudo perf report
 
 perf-stat: test
-	sudo perf stat -d -d -d --repeat=10 --table ./test "benchmark 5000000" simple
+	sudo perf stat -d -d -d --repeat=10 --table ./test "benchmark 10000" manyfiles2
 
 clean_bins:
-	-rm -rf *.o *.so.* *.so test
+	-rm -rf *.o *.so.* *.so test generated/*.o
 
 clean: clean_bins
 	-rm -rf core prof *.gcda *.gcno perf.data perf.data.old cachegrind.out generated
@@ -101,4 +102,7 @@ dist: generated
 	cp generated/*.c $(DIST_DIR)/generated/
 	(cd $(DIST_ROOT); tar czf $(PKG_DIR).tar.gz $(PKG_DIR))
 
-.PHONY: all clean test valgrind dist vim-gdb library install pgo coverage perf perf-stats clean_bins dist dist-clean generated
+tags:
+	ctags-exuberant --langmap=c:+.re *.c *.h *.re
+
+.PHONY: all clean test valgrind dist vim-gdb library install pgo coverage perf perf-stats clean_bins dist dist-clean generated tags
