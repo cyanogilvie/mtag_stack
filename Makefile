@@ -11,7 +11,7 @@ CFLAGS_DEBUG = -Og -ggdb3
 LTO = -flto
 CFLAGS = $(CFLAGS_OPTIMIZE) -g -std=c11 -Wall -Werror $(LTO) $(PGO) -I$(CURDIR)
 LDFLAGS = $(LTO) $(PGO)
-VER = 1.0
+VER = 2.0
 PGOGEN_BUILD = -fprofile-generate=prof
 PGO_BUILD = -fprofile-use=prof -fprofile-partial-training
 PGO =
