@@ -375,7 +375,7 @@ struct mtag_stack_harvest* mtag_stack_harvest_(struct mtag_stack_hist*const rest
 			if (segments && containing_matches) {
 				harvest->containing_storage = (char**)(hist->str+hist->top);	hist->top += containing_matches * sizeof(char*);
 
-				for (size_t i=containing_matches-1; i>=0; i--)
+				for (ptrdiff_t i=containing_matches-1; i>=0; i--)
 					harvest->containing_storage[i] = base + consume_highest(op->containing);
 			}
 

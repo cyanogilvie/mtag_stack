@@ -1,4 +1,5 @@
 DESTDIR =
+VER = 2.0.1
 PREFIX = /usr/local
 OBJS = mtag_stack.o
 CC = gcc
@@ -11,7 +12,6 @@ CFLAGS_DEBUG = -Og
 LTO = -flto
 CFLAGS = $(CFLAGS_OPTIMIZE) -ggdb3 -std=c11 -Wall -Werror $(LTO) $(PGO) -I$(CURDIR)
 LDFLAGS = $(LTO) $(PGO)
-VER = 2.0.1
 PGOGEN_BUILD = -fprofile-generate=prof
 PGO_BUILD = -fprofile-use=prof -fprofile-partial-training
 PGO =
@@ -48,7 +48,7 @@ install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/include
 	cp mtag_stack.h $(DESTDIR)$(PREFIX)/include
 	cp libmtag_stack.$(VER).so $(DESTDIR)$(PREFIX)/lib
-	ln -s libmtag_stack.$(VER).so $(DESTDIR)$(PREFIX)/lib/libmtag_stack.so
+	ln -sf libmtag_stack.$(VER).so $(DESTDIR)$(PREFIX)/lib/libmtag_stack.so
 
 test: generated/test.o library
 	$(CC) $(CFLAGS) -Wl,-rpath="$(CURDIR)" -o $@ $< -L. -I. -lmtag_stack
